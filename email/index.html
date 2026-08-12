@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email Send — ARMS Support Portal</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --border: #dbe1e8;
+    --text: #1c2733;
+    --muted: #5b6b7b;
+    --accent: #0f6bd7;
+    --accent-hover: #0b57b0;
+    --danger: #c0392b;
+    --ok: #1e7e34;
+    --warn-bg: #fff7e0;
+    --warn-border: #e6c65c;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12181f;
+      --surface: #1b232c;
+      --border: #2e3a46;
+      --text: #e8edf2;
+      --muted: #93a3b3;
+      --accent: #4d9bf0;
+      --accent-hover: #6cadf3;
+      --danger: #e5695a;
+      --ok: #4fbf6a;
+      --warn-bg: #33301c;
+      --warn-border: #7a6a2e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header a { color: var(--muted); text-decoration: none; font-size: 13px; }
+  header a:hover { color: var(--accent); }
+  #whoami { margin-left: auto; font-size: 13px; color: var(--muted); }
+  main {
+    display: grid;
+    grid-template-columns: minmax(380px, 46%) 1fr;
+    gap: 20px;
+    padding: 20px 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .panel h2 { font-size: 14px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+  label:first-of-type { margin-top: 0; }
+  label .hint { font-weight: 400; color: var(--muted); }
+  input[type=text], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  #html-source {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    min-height: 320px;
+    resize: vertical;
+    white-space: pre;
+  }
+  .drop-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .dragover { outline: 2px dashed var(--accent); outline-offset: -2px; }
+  .actions { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #status { font-size: 13.5px; margin-top: 12px; min-height: 20px; }
+  #status.error { color: var(--danger); }
+  #status.ok { color: var(--ok); }
+  .preview-wrap { display: flex; flex-direction: column; min-height: 480px; height: calc(100vh - 140px); position: sticky; top: 20px; }
+  .preview-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .preview-toolbar .size { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .width-toggle button { padding: 4px 10px; font-size: 12px; font-weight: 500; }
+  .width-toggle button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  #preview-frame-holder {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  #preview {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-height: 420px;
+    border: 0;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    flex-shrink: 0;
+  }
+  #preview.mobile { width: 390px; }
+  .notice {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>✉️ Email Send</h1>
+  <a href="/">← Support Portal</a>
+  <span id="whoami"></span>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Compose</h2>
+    <label for="to">To <span class="hint">— comma or semicolon separated</span></label>
+    <input type="text" id="to" placeholder="jane@example.com, ops@example.com" autocomplete="off">
+
+    <label for="cc">Cc <span class="hint">— optional</span></label>
+    <input type="text" id="cc" placeholder="" autocomplete="off">
+
+    <label for="subject">Subject</label>
+    <input type="text" id="subject" placeholder="Weekly Support Report — w/c 10 Aug" autocomplete="off">
+
+    <label for="html-source">HTML <span class="hint">— paste your email HTML here</span></label>
+    <textarea id="html-source" spellcheck="false" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;…"></textarea>
+    <div class="drop-hint">Tip: you can also drag &amp; drop a <code>.html</code> file onto the editor.</div>
+
+    <div class="notice" id="js-warning">⚠️ This HTML contains <code>&lt;script&gt;</code> tags. Email clients strip scripts — anything interactive won't work in the recipient's inbox.</div>
+    <div class="notice" id="ext-css-warning">⚠️ This HTML links external stylesheets. Most email clients ignore <code>&lt;link rel="stylesheet"&gt;</code> — inline your CSS for reliable rendering.</div>
+
+    <div class="actions">
+      <button class="primary" id="send-btn">Send</button>
+      <button id="test-btn">Send test to me</button>
+      <button id="clear-btn">Clear</button>
+    </div>
+    <div id="status"></div>
+  </section>
+
+  <section class="preview-wrap">
+    <div class="preview-toolbar">
+      <h2 style="margin:0">Preview</h2>
+      <span class="width-toggle">
+        <button id="w-desktop" class="active" type="button">Desktop</button>
+        <button id="w-mobile" type="button">Mobile</button>
+      </span>
+      <span class="size" id="size-label"></span>
+    </div>
+    <div id="preview-frame-holder">
+      <iframe id="preview" sandbox="allow-same-origin" title="Email preview"></iframe>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const source = $('html-source');
+  const preview = $('preview');
+  const status = $('status');
+  let myEmail = null;
+
+  // Who am I (Static Web Apps built-in auth)
+  fetch('/.auth/me').then(r => r.json()).then(data => {
+    const p = data && data.clientPrincipal;
+    if (p && p.userDetails) {
+      myEmail = p.userDetails;
+      $('whoami').textContent = p.userDetails;
+    } else {
+      $('whoami').innerHTML = '<a href="/.auth/login/aad">Sign in</a>';
+    }
+  }).catch(() => {});
+
+  function render() {
+    const html = source.value;
+    preview.srcdoc = html || '<div style="font-family:sans-serif;color:#8a97a3;padding:40px;text-align:center">Paste HTML on the left to preview it here</div>';
+    const bytes = new Blob([html]).size;
+    $('size-label').textContent = html ? (bytes > 1024 * 1024
+      ? (bytes / 1048576).toFixed(2) + ' MB' : (bytes / 1024).toFixed(1) + ' KB') : '';
+    $('js-warning').style.display = /<script[\s>]/i.test(html) ? 'block' : 'none';
+    $('ext-css-warning').style.display = /<link[^>]+stylesheet/i.test(html) ? 'block' : 'none';
+  }
+  let t;
+  source.addEventListener('input', () => { clearTimeout(t); t = setTimeout(render, 250); });
+  render();
+
+  // Drag & drop a .html file
+  source.addEventListener('dragover', (e) => { e.preventDefault(); source.classList.add('dragover'); });
+  source.addEventListener('dragleave', () => source.classList.remove('dragover'));
+  source.addEventListener('drop', (e) => {
+    e.preventDefault();
+    source.classList.remove('dragover');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file) return;
+    file.text().then((text) => { source.value = text; render(); });
+  });
+
+  // Preview width toggle
+  $('w-desktop').addEventListener('click', () => setWidth(false));
+  $('w-mobile').addEventListener('click', () => setWidth(true));
+  function setWidth(mobile) {
+    preview.classList.toggle('mobile', mobile);
+    $('w-mobile').classList.toggle('active', mobile);
+    $('w-desktop').classList.toggle('active', !mobile);
+  }
+
+  function setStatus(msg, cls) {
+    status.textContent = msg;
+    status.className = cls || '';
+  }
+
+  async function send(toOverride) {
+    const to = toOverride || $('to').value.trim();
+    const cc = toOverride ? '' : $('cc').value.trim();
+    const subject = $('subject').value.trim();
+    const html = source.value;
+
+    if (!to) return setStatus('Add at least one recipient.', 'error');
+    if (!subject) return setStatus('Add a subject.', 'error');
+    if (!html.trim()) return setStatus('The email HTML is empty.', 'error');
+
+    const recipients = to.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+    if (!toOverride) {
+      const label = recipients.length === 1 ? recipients[0] : recipients.length + ' recipients';
+      if (!confirm('Send "' + subject + '" to ' + label + '?')) return;
+    }
+
+    const buttons = [$('send-btn'), $('test-btn')];
+    buttons.forEach(b => b.disabled = true);
+    setStatus(toOverride ? 'Sending test…' : 'Sending…');
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, cc, subject, html }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || ('Request failed (' + res.status + ')'));
+      setStatus('✓ Sent to ' + body.to.join(', ') + (body.cc && body.cc.length ? ' (cc: ' + body.cc.join(', ') + ')' : ''), 'ok');
+    } catch (err) {
+      setStatus(err.message, 'error');
+    } finally {
+      buttons.forEach(b => b.disabled = false);
+    }
+  }
+
+  $('send-btn').addEventListener('click', () => send());
+  $('test-btn').addEventListener('click', () => {
+    if (!myEmail) return setStatus('Sign in first so I know your address.', 'error');
+    send(myEmail);
+  });
+  $('clear-btn').addEventListener('click', () => {
+    if (source.value && !confirm('Clear the composer?')) return;
+    ['to', 'cc', 'subject'].forEach(id => $(id).value = '');
+    source.value = '';
+    render();
+    setStatus('');
+  });
+})();
+</script>
+</body>
+</html>

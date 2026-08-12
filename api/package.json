@@ -1,0 +1,12 @@
+{
+  "name": "arms-support-portal-api",
+  "version": "1.0.0",
+  "description": "API for the ARMS support portal (Azure Static Web Apps managed functions)",
+  "main": "src/functions/*.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0"
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARMS Support Portal</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --surface: #fff; --border: #dbe1e8;
+    --text: #1c2733; --muted: #5b6b7b; --accent: #0f6bd7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12181f; --surface: #1b232c; --border: #2e3a46;
+      --text: #e8edf2; --muted: #93a3b3; --accent: #4d9bf0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
+  header { padding: 20px 32px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  header h1 { font-size: 20px; margin: 0; }
+  main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 32px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  a.card {
+    display: block; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; text-decoration: none; color: inherit;
+    transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card .icon { font-size: 28px; }
+  .card h2 { font-size: 16px; margin: 10px 0 4px; }
+  .card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header><h1>ARMS Support Portal</h1></header>
+<main>
+  <div class="grid">
+    <a class="card" href="/email/">
+      <div class="icon">✉️</div>
+      <h2>Email Send</h2>
+      <p>Paste an HTML email, preview it, and send it to any recipients.</p>
+    </a>
+  </div>
+</main>
+</body>
+</html>
